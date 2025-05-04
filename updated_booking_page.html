@@ -9,12 +9,14 @@
     .container { max-width: 700px; margin: auto; background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     h1 { text-align: center; }
     select, input, button { width: 100%; padding: 10px; margin: 10px 0; }
-    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 1rem; }
-    .day { padding: 10px; text-align: center; border-radius: 5px; color: white; }
-    .available { background: #48a9e6; }
-    .booked { background: #333; }
-    img { width: 100%; max-height: 200px; object-fit: cover; margin-top: 1rem; border-radius: 10px; }
-    #confirmation { text-align: center; margin-top: 1rem; color: green; font-weight: bold; }
+<div id="calendar">
+  <button onclick="prevWeek()">← Previous Week</button>
+  <button onclick="nextWeek()">Next Week →</button>
+  <div id="weekView" class="week-grid">
+    <!-- Dagen worden hier dynamisch ingevuld -->
+  </div>
+</div>
+
   </style>
 </head>
 <body>
@@ -29,7 +31,10 @@
   <option value="4">4-person house ($600/night)</option>
 </select>
 
-    <img id="houseImage" style="display:none;" />
+<div id="userInputs">
+  <!-- Gebruikersnaamvelden worden hier gegenereerd -->
+</div>
+ <img id="houseImage" style="display:none;" />
 
     <label>Start Day:</label>
     <select id="startDay"></select>
@@ -45,7 +50,33 @@
   </div>
 
   <script>
-    const bookings = {
+      const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+let currentWeekStart = 0;
+
+function renderCalendar() {
+  const weekView = document.getElementById("weekView");
+  weekView.innerHTML = "";
+
+  for (let i = 0; i < 7; i++) {
+    const dayBox = document.createElement("div");
+    dayBox.className = "day-box";
+    dayBox.textContent = weekDays[i];
+    weekView.appendChild(dayBox);
+  }
+}
+
+function nextWeek() {
+  currentWeekStart += 7;
+  renderCalendar();
+}
+
+function prevWeek() {
+  currentWeekStart = Math.max(0, currentWeekStart - 7);
+  renderCalendar();
+}
+
+document.addEventListener("DOMContentLoaded", renderCalendar);
+const bookings = {
       "4": [],
       "2": [],
       "1": []
@@ -105,6 +136,20 @@
         alert("Please fill in all fields correctly.");
         return;
       }
+document.getElementById("house").addEventListener("change", function () {
+  const userInputs = document.getElementById("userInputs");
+  userInputs.innerHTML = "";
+  const houseValue = parseInt(this.value);
+  const minRequired = houseValue === 4 ? 3 : houseValue;
+
+  for (let i = 1; i <= houseValue; i++) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = `Username ${i}`;
+    input.required = i <= minRequired;
+    userInputs.appendChild(input);
+  }
+});
 
       for (let i = start; i <= end; i++) {
         if (bookings[house].includes(i)) {
